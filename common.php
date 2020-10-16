@@ -29,9 +29,11 @@ $response = $mj->post(Resources::$Listrecipient, ['body' => $body]);
 $response->success() && var_dump($response->getData());
 
 
+
 //get contact id with email address
 $response = $mj->get(\Mailjet\Resources::$Contact, ['id' => $contactTest]);
 $response->success() && var_dump($response->getData());
+
 
 
 //add contact meta data. You can use the email as an ID, or the above to get the ID first if you wish
