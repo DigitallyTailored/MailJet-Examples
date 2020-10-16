@@ -2,13 +2,14 @@
 
 
 //this is if the WordPress plugin is being used which already contains the MailJet PHP API, otherwise you can manually require it here
-//require 'vendor/autoload.php';
+//https://en-gb.wordpress.org/plugins/mailjet-for-wordpress/
+use \Mailjet\Client;
 use \Mailjet\Resources;
 //getting the API keys stored against the wordpress plugin
-$mj = new \Mailjet\Client(get_option('mailjet_apikey'), get_option('mailjet_apisecret'), true, ['version' => 'v3']);
+$mj = new Client(get_option('mailjet_apikey'), get_option('mailjet_apisecret'), true, ['version' => 'v3']);
 
 
-$contactTest = "luke@devanew.com";
+$contactTest = "new-contact@example.com";
 
 //add contact
 $body = [
@@ -31,42 +32,47 @@ $response->success() && var_dump($response->getData());
 
 
 //get contact id with email address
-$response = $mj->get(\Mailjet\Resources::$Contact, ['id' => $contactTest]);
+$response = $mj->get(Resources::$Contact, ['id' => $contactTest]);
 $response->success() && var_dump($response->getData());
 
 
 
 //add contact meta data. You can use the email as an ID, or the above to get the ID first if you wish
 $body = [
-  'Data' => [
-    [
-      'Name' => "location",
-      'Value' => "Ireland"
+    'Data' => [
+        [
+            'Name' => "location",
+            'Value' => "Ireland"
+        ]
     ]
-  ]
 ];
-$response = $mj->put(\Mailjet\Resources::$Contactdata, ['id' => $contactTest, 'body' => $body]);
+$response = $mj->put(Resources::$Contactdata, ['id' => $contactTest, 'body' => $body]);
 $response->success() && var_dump($response->getData());
 
 
 
 //send email to list using a template. This uses API v3.1 which has a slightly different syntax so we need a new client
-$mj = new \Mailjet\Client(get_option('mailjet_apikey'), get_option('mailjet_apisecret'), true, ['version' => 'v3.1']);
+$mj = new Client(get_option('mailjet_apikey'), get_option('mailjet_apisecret'), true, ['version' => 'v3.1']);
 $body = [
     'Messages' => [
         [   'TemplateID' => 12345,
-            "TemplateLanguage" => true, //required for using variables
+            //enable template language for using variables
+            "TemplateLanguage" => true,
             'From' => [
                 'Email' => "marketing@example.com",
                 'Name' => "Marketing Team"
             ],
             'To' => [
                 [
-                    'Email' => "12345@lists.mailjet.com", //this email address will send to everyone in the list
+                    //this email address will send to everyone in the list. You can get the email to use from the list page
+                    'Email' => "12345@lists.mailjet.com",
                 ]
             ],
             'Subject' => "Test subject",
-            'Variables' => ['api_content' => 'I am the email content!', 'api_title' => 'I am a title!'], //These variables are included in the template so we can design the email outside of PHP and set the content here
+            //These variables are included in the template so we can design the email outside of PHP and set the content here
+            //in the template use {{var:api_title}} and {{var:api_content}}
+            //{{var:api_content}} should be inside an HTML block
+            'Variables' => ['api_content' => 'I am the email content!', 'api_title' => 'I am a title!'],
         ]
     ]
 ];
